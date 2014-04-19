@@ -1,0 +1,146 @@
+<div class="slider-container ">
+    <div class="slider">
+        <div class="inner-boxes">
+            <a href="#.">
+                <img src="/images/1.jpg" alt="1 image">
+            </a>
+        </div>
+        <div class="inner-boxes">
+            <a href="#.">
+                <img src="/images/2.jpg" alt="2 image">
+            </a>
+        </div>
+        <div class="inner-boxes">
+            <a href="#.">
+                <img src="/images/3.jpg" alt="3 image">
+            </a>
+        </div>
+        <div class="inner-boxes">
+            <a href="#.">
+                <img src="/images/4.jpg" alt="4 image">
+            </a>
+        </div>
+        <div class="inner-boxes">
+            <a href="#.">
+                <img src="/images/5.jpg" alt="5">
+            </a>
+        </div>
+    </div>
+    <div class="left-shade"></div>
+    <div class="right-shade"></div>
+    <div class="middle-frame"></div>
+    <div class="slider-nav">
+        <a href="#." class="nav-dot" data-img="1">1</a>
+        <a href="#." class="nav-dot" data-img="2">2</a>
+        <a href="#." class="nav-dot" data-img="3">3</a>
+        <a href="#." class="nav-dot" data-img="4">4</a>
+        <a href="#." class="nav-dot" data-img="5">5</a>
+
+    </div>
+</div>
+<script>
+    $(function() {
+        console.time("slider");
+        //Declaration of variables
+        var $slider = $(".slider");
+        var $innerBoxes = $slider.find(".inner-boxes");
+        var listElem = [];
+        $innerBoxes.each(function(idx, elem) {
+            listElem[idx] = elem;
+        });
+        var $navigation = $(".slider-nav").find(".nav-dot");
+
+        //Attaching handler for dots
+        $navigation.click(function() {
+            clickLogic($(this));
+        });
+
+        //Dots click logic
+        function clickLogic($self) {
+            $slider.clearQueue().stop(true, true);
+            clearInterval(interval);
+            $(".active").removeClass("active");
+            var $this = $self.addClass("active");
+            var index = $this.data("img") - 1;
+            var item = $(listElem[index]);
+            var divPos = item.index();
+            if (item.next().length == 0) {
+                $innerBoxes = $slider.find(".inner-boxes");
+                var clone = $innerBoxes.first().clone();
+                $innerBoxes.last().after(clone);
+                divPos = divPos;
+            } else if (item.prev().length == 0) {
+                $innerBoxes = $slider.find(".inner-boxes");
+                $innerBoxes.last().insertBefore($innerBoxes.first());
+                divPos = 1;
+                $slider.css({
+                    left: -400
+                });
+            }
+            animate(divPos, clone);
+
+        }
+
+        //setting the default interval
+        var interval = setInterval(animate, 4000);
+
+
+
+        //Animation is done here
+        function animate(param, clone) {
+            var localVar = 1;
+            if (param !== undefined) {
+                localVar = param - 1;
+            }
+
+            $slider
+                .clearQueue()
+                .stop(true, true)
+                .animate({
+                    "left": (-400 * localVar)
+                }, 1000, "easeInOutBack", function() {
+
+                    animationCallback(param, clone)
+
+                });
+        }
+
+
+
+        //Animation callback 
+        function animationCallback(param, clone) {
+            debugger;
+            if (param !== undefined) {
+                if (clone !== undefined && clone.length > 0) {
+                    clone.remove();
+                }
+                if (param > 1) {
+                    for (i = 0; i < param - 1; i++) {
+                        $slider.find(".inner-boxes").last()
+                            .after($slider.find(".inner-boxes").first());
+                    }
+                }
+                interval = setInterval(animate, 4000);
+            } else {
+                $innerBoxes = $slider.find(".inner-boxes");
+                $innerBoxes.last().after($innerBoxes.first());
+                var $active = $(".active");
+                if ($active.next().length == 0) {
+                    $active.removeClass("active");
+                    $navigation.first().addClass("active");
+                } else {
+                    $active.removeClass("active").next().addClass("active");
+                }
+
+            }
+            $slider.css("left", 0);
+        }
+
+
+        //first run
+        clickLogic($navigation.first());
+
+        console.timeEnd("slider");
+    })
+</script>
+
